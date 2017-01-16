@@ -1,0 +1,1 @@
+Simple C# .NET Application that will import files from a folder into a folder specified in a SOLIDWORKS PDM Professional Vault.
