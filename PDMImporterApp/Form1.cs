@@ -7,12 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using EdmLib;
 
 
 namespace PDMImporterApp
 {
     public partial class Form1 : Form
     {
+        EdmVault5 vault;
 
         #region Handle form loading
 
@@ -101,8 +103,74 @@ namespace PDMImporterApp
             String vaultPath = this.textBox_vaultPath.Text;
             String importPath = this.textBox_path.Text;
 
+            String result = "";
+            int parentWnd = this.Handle.ToInt32();
+            // get file from the source folder
+            string[] filesToImport = Directory.GetFiles(importPath);
+            if (filesToImport.Length > 0)
+            {
+                // connect to the pdm vault
+                if (connectToVault(vaultName))
+                {
+                    // get the folder in epdm that the files will be imported into
+                    IEdmFolder6 folderObj = (IEdmFolder6)vault.GetFolderFromPath(vaultPath);
+                    if (folderObj != null)
+                    {
+                        // import the files into the vault using AddFile and AddFiles
+                        foreach (String file in filesToImport)
+                        {
+                            folderObj.AddFile(parentWnd, file, "", (int)EdmAddFlag.EdmAdd_Simple);
+                        }
+                        
+                        folderObj.Refresh();
 
-            this.textBox_result.Text = "Start button clicked. Nothing exciting is happening yet.";
+                        // check the files in
+                        foreach (String file in filesToImport)
+                        {
+                            IEdmFile5 aFile = folderObj.GetFile(Path.GetFileName(file));
+                            if (aFile != null)
+                                aFile.UnlockFile(parentWnd, "Auto imported.");
+                        }
+
+                        result = "Files have been added to the vault.";
+                    }
+                    else
+                    {
+                        result = "Folder in vault could not be found.";
+                    }
+                }
+                else
+                {
+                    result = "Could not connect to the vault.";
+                }
+            }
+            else
+            {
+                result = "Start button clicked. Nothing exciting is happening yet.";
+            }
+
+            this.textBox_result.Text = result;
+        }
+
+        private Boolean connectToVault(String vaultName)
+        {
+            try
+            {
+                if (vault == null)
+                {
+                    vault = new EdmVault5();
+                }
+                if (!vault.IsLoggedIn)
+                {
+                    vault.LoginAuto(vaultName, this.Handle.ToInt32());
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+            
         }
     }
 }
