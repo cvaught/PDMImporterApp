@@ -146,7 +146,7 @@ namespace PDMImporterApp
             }
             else
             {
-                result = "Start button clicked. Nothing exciting is happening yet.";
+                result = "There are no files to import.";
             }
 
             this.textBox_result.Text = result;
