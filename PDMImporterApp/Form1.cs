@@ -129,7 +129,10 @@ namespace PDMImporterApp
                         {
                             IEdmFile5 aFile = folderObj.GetFile(Path.GetFileName(file));
                             if (aFile != null)
+                            {
                                 aFile.UnlockFile(parentWnd, "Auto imported.");
+                                aFile.ChangeState("Approved", folderObj.ID, "Auto approved.", this.Handle.ToInt32());
+                            }
                         }
 
                         result = "Files have been added to the vault.";
